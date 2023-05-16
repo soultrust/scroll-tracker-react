@@ -1,7 +1,8 @@
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import _ from 'lodash';
 
 const trackerReducer = (state, action) => {
+
   if (action.type === 'SET_SCROLL_POSITIONS') {
     return { 
       scrollPositions: action.scrollPositions, 
@@ -17,6 +18,69 @@ const ScrollTracker = () => {
   const [chapters, setChapters] = useState([]);
   const mainWrapperRef = useRef(null);
   const navRef = useRef(null);
+  const scrollPositions = useRef([]);
+  const chapterCount = useRef(null);
+  const isAutoScrolling = useRef(false);
+  const highlightedChapter = useRef(null);
+  const windowHeight = useRef(window.innerHeight);
+  const currScrollPos = useRef(0);
+
+  const checkPos = (index) => {
+    let totalOffset = windowHeight.current - (windowHeight.current * scrollOffset);
+    currScrollPos.current = document.documentElement.scrollTop;
+
+    if (scrollPositions.current[index+1] && 
+        currScrollPos.current >= scrollPositions.current[index].y - totalOffset && 
+        currScrollPos.current < scrollPositions.current[index+1].y - totalOffset) {
+      return index;
+    }
+    else if (currScrollPos.current < scrollPositions.current[0].y - totalOffset) {
+      return 0;
+    } 
+    else if (currScrollPos.current > scrollPositions.current[chapterCount.current-1].y - totalOffset) {
+      return chapterCount.current - 1;
+    } 
+    else {
+      return -1;
+    }
+  };
+
+  const getChapterToHighlight = useCallback(() => {
+    var returnValue;
+
+    for (let i = 0; i < chapterCount.current; i++) {
+      let result = checkPos(i);
+      if (result >= 0) {
+        returnValue = result;
+        break;
+      }
+    }
+    return returnValue;
+  }, []);
+
+  const highlightChapter = useCallback((chapterNum) => {
+    let chapterToHighlight;
+  //  debugger;
+    if (typeof chapterNum === 'number') {
+      chapterToHighlight = chapterNum - 1;
+    }
+    else {
+      if (isAutoScrolling.current) { return false; }
+      chapterToHighlight = getChapterToHighlight();
+    }
+    if (highlightedChapter === chapterToHighlight) { return false; }
+
+    const nav = navRef.current;
+    const active = nav.querySelector('.chapters__nav-item--active');
+    if (active) {
+      active.classList.remove('chapters__nav-item--active');
+    }
+    const navItems = Array.from(nav.querySelectorAll('.chapters__nav-item'));
+    if (navItems[chapterToHighlight]) {
+      navItems[chapterToHighlight].classList.add('chapters__nav-item--active');
+    }
+    highlightedChapter.current = chapterToHighlight;
+  }, [getChapterToHighlight]);
 
   useEffect(() => {
     fetch('./chapters.json')
@@ -35,16 +99,17 @@ const ScrollTracker = () => {
           y: el.offsetTop
         };
       });
-      dispatchTracker({ 
-        type: 'SET_SCROLL_POSITIONS', 
-        scrollPositions: scrollPosArr, 
-        chapterCount: chapters.length
-      });
+      
+      scrollPositions.current = scrollPosArr;
+      chapterCount.current = chapters.length;
+      const throttled_highlightChapter = _.throttle(highlightChapter, 400);
+      window.addEventListener('scroll', throttled_highlightChapter);
+      highlightChapter();
     }
-  }, [chapters]);
+  }, [chapters, highlightChapter]);
 
   const jumpToChapter = () => {
-    
+
   };
 
   return (
