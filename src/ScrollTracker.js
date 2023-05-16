@@ -1,20 +1,16 @@
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import _ from 'lodash';
 
-const trackerReducer = (state, action) => {
+const jumpOffset = 10;
+const scrollOffset = .60;
 
-  if (action.type === 'SET_SCROLL_POSITIONS') {
-    return { 
-      scrollPositions: action.scrollPositions, 
-      chapterCount: action.chapterCount 
-    };
-  }
+const easeOutQuart = (t, b, c, d) => {
+  t /= d;
+  t--;
+  return -c * (t * t * t * t - 1) + b;
 };
 
 const ScrollTracker = () => {
-  const jumpOffset = 45;
-  const scrollOffset = .40;
-  const [trackerState, dispatchTracker] = useReducer(trackerReducer);
   const [chapters, setChapters] = useState([]);
   const mainWrapperRef = useRef(null);
   const navRef = useRef(null);
@@ -24,6 +20,51 @@ const ScrollTracker = () => {
   const highlightedChapter = useRef(null);
   const windowHeight = useRef(window.innerHeight);
   const currScrollPos = useRef(0);
+
+  const scrollTo = (target, duration) => {
+    const startPosition = window.pageYOffset; // Initial scroll position
+    const targetPosition = target.offsetTop - jumpOffset; // Target scroll position
+    const distance = targetPosition - startPosition; // Distance to scroll
+    const startTime = performance.now(); // Start time of animation
+  
+    function step(timestamp) {
+      const currentTime = timestamp - startTime; // Elapsed time
+  
+      // Calculate the new scroll position using the easing function
+      window.scrollTo(0, easeOutQuart(currentTime, startPosition, distance, duration));
+  
+      // Check if the animation is finished
+      if (currentTime < duration) {
+        // Continue the animation
+        requestAnimationFrame(step);
+      } else {
+        // Animation completed
+        window.scrollTo(0, targetPosition);
+        isAutoScrolling.current = false;
+      }
+    }
+  
+    // Start the animation
+    requestAnimationFrame(step);
+  };
+
+  const jumpToChapter = (event) => {
+    isAutoScrolling.current = true;
+    const navlink = event.target;
+    
+    if (window.location.pathname.replace(/^\//,'') === navlink.pathname.replace(/^\//,'') 
+        && window.location.hostname === navlink.hostname) {
+
+      let target = document.querySelector(navlink.hash);
+
+      target = target ? target : document.querySelector('[name=' + navlink.hash.slice(1) +']');
+      highlightChapter(parseInt(navlink.hash.replace(/#chapter/, '')));
+      
+      if (target) {
+        scrollTo(target, 1000);
+      }
+    }
+  };
 
   const checkPos = (index) => {
     let totalOffset = windowHeight.current - (windowHeight.current * scrollOffset);
@@ -60,8 +101,8 @@ const ScrollTracker = () => {
 
   const highlightChapter = useCallback((chapterNum) => {
     let chapterToHighlight;
-  //  debugger;
-    if (typeof chapterNum === 'number') {
+
+    if (chapterNum && typeof chapterNum === 'number') {
       chapterToHighlight = chapterNum - 1;
     }
     else {
@@ -107,10 +148,6 @@ const ScrollTracker = () => {
       highlightChapter();
     }
   }, [chapters, highlightChapter]);
-
-  const jumpToChapter = () => {
-
-  };
 
   return (
     <>

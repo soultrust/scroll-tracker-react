@@ -1,5 +1,5 @@
 import './App.scss';
-import ScrollTracker from './ScrollTracker/ScrollTracker';
+import ScrollTracker from './ScrollTracker';
 
 function App() {
   return (
