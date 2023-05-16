@@ -1,0 +1,44 @@
+.main-wrapper {
+  margin-left: 7rem;
+  font-family: 'Roboto Condensed', 'Lucida Grande', sans-serif;
+  margin-bottom: 10%;
+  position: relative;
+}
+
+p {
+  max-width: 400px;
+}
+
+.chapters {
+  &__nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    list-style: none;
+    padding: 0;
+    
+    &-item {
+      padding: .5rem;
+      text-decoration: none;
+    
+      &--active {
+        background: #333;
+        
+        .chapters__nav-link {
+          color: #fff;
+        }
+      }
+      
+    }
+    
+    &-link {
+      text-decoration: none;
+      font-family: 'Roboto Condensed', sans-serif;
+      color: #000;
+    }
+  }
+  
+  p + &__title {
+    margin-top: 3rem; 
+  }
+}
