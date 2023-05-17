@@ -113,13 +113,13 @@ const ScrollTracker = () => {
     if (highlightedChapter === chapterToHighlight) { return false; }
 
     const nav = navRef.current;
-    const active = nav.querySelector('.chapters__nav-item--active');
+    const active = nav.querySelector('.is-active');
     if (active) {
-      active.classList.remove('chapters__nav-item--active');
+      active.classList.remove('is-active');
     }
     const navItems = Array.from(nav.querySelectorAll('.chapters__nav-item'));
     if (navItems[chapterToHighlight]) {
-      navItems[chapterToHighlight].classList.add('chapters__nav-item--active');
+      navItems[chapterToHighlight].classList.add('is-active');
     }
     highlightedChapter.current = chapterToHighlight;
   }, [getChapterToHighlight]);
@@ -146,9 +146,9 @@ const ScrollTracker = () => {
 
   useEffect(() => {
     if (chapters.length) {
-      chapterElements.current = [...mainWrapperRef.current.querySelectorAll('.chapters__title')];
+      chapterElements.current = [...mainWrapperRef.current.querySelectorAll('.chapter')];
       const scrollPosArr = chapterElements.current.map(el => {
-        const title = el.querySelector('h2').textContent;
+        const title = el.querySelector('.chapter__title').textContent;
         return {
           title: title,
           y: Math.round(el.offsetTop)
@@ -167,7 +167,7 @@ const ScrollTracker = () => {
 
   return (
     <>
-       <ul className="chapters__nav" ref={navRef}>
+       <ul id="chapters__nav" ref={navRef}>
         {chapters.map((item, index) => {
           return (
             <li key={`chapter${index + 1}`} className="chapters__nav-item">
@@ -182,15 +182,15 @@ const ScrollTracker = () => {
           );
         })}
       </ul>
-      <div className="main-wrapper" ref={mainWrapperRef}>
+      <div id="chapters__wrapper" ref={mainWrapperRef}>
         {chapters.map((item, index) => {
           return (
             <div 
               key={`chapter${index + 1}`} 
               id={`chapter${index + 1}`} 
-              className="chapters__title"
+              className="chapter"
             >
-              <h2>{item.title}</h2>
+              <h2 className="chapter__title">{item.title}</h2>
               <div dangerouslySetInnerHTML={{__html: item.content}} />
             </div>
           );

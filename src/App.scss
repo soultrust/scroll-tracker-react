@@ -1,54 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap');
-
-html {
-  font-size: 62.5%;
+#chapters__nav {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  list-style: none;
+  padding: 0;
 }
 
-body {
-  font-size: 1.6rem;
+.chapters__nav {
+  &-item {
+    padding: .5rem;
+    text-decoration: none;
+    transition: background-color .3s ease-out;
+
+    &:not(.is-active):hover {
+      background-color: #dfdfdf;
+    }
+  
+    &.is-active {
+      background: #333;
+      
+      .chapters__nav-link {
+        color: #fff;
+      }
+    }
+  }
+  
+  &-link {
+    text-decoration: none;
+    color: #000;
+  }
 }
 
-.main-wrapper {
+#chapters__wrapper {
   margin-left: 10rem;
-  font-family: 'Roboto Condensed', 'Lucida Grande', sans-serif;
   margin-bottom: 10%;
   position: relative;
 }
 
-p {
-  max-width: 400px;
+.chapter {
+  margin-bottom: 5rem;
 }
 
-.chapters {
-  &__nav {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    list-style: none;
-    padding: 0;
-    
-    &-item {
-      padding: .5rem;
-      text-decoration: none;
-    
-      &--active {
-        background: #333;
-        
-        .chapters__nav-link {
-          color: #fff;
-        }
-      }
-      
-    }
-    
-    &-link {
-      text-decoration: none;
-      font-family: 'Roboto Condensed', 'Lucida Grande', sans-serif;
-      color: #000;
-    }
-  }
-  
-  &__title {
-    margin-bottom: 5rem;
-  }
+p {
+  max-width: 400px;
 }
