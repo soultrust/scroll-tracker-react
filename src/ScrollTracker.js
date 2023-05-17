@@ -20,6 +20,7 @@ const ScrollTracker = () => {
   const highlightedChapter = useRef(null);
   const windowHeight = useRef(window.innerHeight);
   const currScrollPos = useRef(0);
+  const chapterElements = useRef([]);
 
   const scrollTo = (target, duration) => {
     const startPosition = window.pageYOffset; // Initial scroll position
@@ -131,23 +132,38 @@ const ScrollTracker = () => {
       });
   }, []);
 
+  // Re-initialize function to handle window resize
+  const init = useCallback(() => {
+    windowHeight.current = window.innerHeight;
+
+    // Only update y coords of chapter titles
+    scrollPositions.current.forEach((pos, index) => {
+      scrollPositions.current[index].y = Math.round(
+        chapterElements.current[index].offsetTop
+      );
+    });
+  }, []);
+
   useEffect(() => {
     if (chapters.length) {
-      const scrollPosArr = Array.from(mainWrapperRef.current.querySelectorAll('.chapters__title'), el => {
+      chapterElements.current = [...mainWrapperRef.current.querySelectorAll('.chapters__title')];
+      const scrollPosArr = chapterElements.current.map(el => {
         const title = el.querySelector('h2').textContent;
         return {
           title: title,
-          y: el.offsetTop
+          y: Math.round(el.offsetTop)
         };
       });
       
       scrollPositions.current = scrollPosArr;
       chapterCount.current = chapters.length;
-      const throttled_highlightChapter = _.throttle(highlightChapter, 400);
+      const throttled_highlightChapter = _.throttle(highlightChapter, 300);
       window.addEventListener('scroll', throttled_highlightChapter);
+      const debounced_init = _.debounce(init, 800);
+      window.addEventListener('resize', debounced_init);
       highlightChapter();
     }
-  }, [chapters, highlightChapter]);
+  }, [chapters, highlightChapter, init]);
 
   return (
     <>
