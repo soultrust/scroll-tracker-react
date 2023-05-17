@@ -59,7 +59,7 @@ const ScrollTracker = () => {
       let target = document.querySelector(navlink.hash);
 
       target = target ? target : document.querySelector('[name=' + navlink.hash.slice(1) +']');
-      highlightChapter(parseInt(navlink.hash.replace(/#chapter/, '')));
+      highlightChapter(parseInt(navlink.hash.replace(/#chapter/, ''), 10));
       
       if (target) {
         scrollTo(target, 1000);
